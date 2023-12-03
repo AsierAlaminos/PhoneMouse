@@ -9,6 +9,7 @@ public class Main {
 
 		try {
 			DatagramSocket socket = new DatagramSocket(6000);
+			System.out.println("[*] Servidor iniciado por el puerto 6000");
 			Robot robot = new Robot();
 			while (true) {
 				byte[] buffer = new byte[1024];
@@ -18,12 +19,13 @@ public class Main {
 
 				String paqueteRecibido = new String(paquete.getData(), 0, paquete.getLength());
 
-				if (paqueteRecibido.split(":")[0].equalsIgnoreCase("pos")) {
+				if (paqueteRecibido.split(":")[0].equalsIgnoreCase("posScreen")) {
 					String[] posicion = paqueteRecibido.split(":");
 
-					float[] posicionesMouse = new float[]{MouseInfo.getPointerInfo().getLocation().x + Float.parseFloat(posicion[1]), MouseInfo.getPointerInfo().getLocation().y + Float.parseFloat(posicion[2])};
+					int x = (int)(Float.parseFloat(posicion[1]) + MouseInfo.getPointerInfo().getLocation().x);
+					int y = (int)(Float.parseFloat(posicion[2]) + MouseInfo.getPointerInfo().getLocation().y);
 
-					robot.mouseMove((int) posicionesMouse[0], (int) posicionesMouse[1]);
+					robot.mouseMove(x, y);
 				}else if (paqueteRecibido.split(":")[0].equalsIgnoreCase("press")){
 					String botonPresionado = paqueteRecibido.split(":")[1];
 					int mask = 0;
@@ -34,6 +36,11 @@ public class Main {
 					}
 					robot.mousePress(mask);
 					robot.mouseRelease(mask);
+				} else if (paqueteRecibido.split(":")[0].equalsIgnoreCase("pos")) {
+					String[] posicion = paqueteRecibido.split(":");
+					int x = (int) Float.parseFloat(posicion[1].replace(",", ".")) + MouseInfo.getPointerInfo().getLocation().x;
+					int y = (int) Float.parseFloat(posicion[2].replace(",", ".")) + MouseInfo.getPointerInfo().getLocation().y;
+					robot.mouseMove(x, y);
 				}
 			}
 		} catch (IOException e) {
